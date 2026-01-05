@@ -1,0 +1,11 @@
+# Add project dependencies here
+PySpin
+opencv-python
+numpy
+requests
+torch
+matplotlib
+pandas
+scikit-image
+anomalib
+pathlib
