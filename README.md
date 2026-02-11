@@ -1,33 +1,7 @@
 # Glove Defect Detection using Anomalib
 
 A comprehensive anomaly detection system for detecting defects in glove reinforcement patches (between thumb and index finger) using the Anomalib framework. This project trains 19 different anomaly detection models across 16 lighting conditions and provides interactive visualization of results.
-##  Architecture
 
-### System Components
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Main Pipeline (main.py)                  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                 ┌────────────┼────────────┐
-                 │            │            │
-                 ▼            ▼            ▼
-         ┌──────────┐  ┌──────────┐  ┌──────────┐
-         │Preprocess│  │  Train   │  │ Validate │
-         └──────────┘  └──────────┘  └──────────┘
-                 │            │            │
-                 ▼            ▼            ▼
-         ┌──────────┐  ┌──────────┐  ┌──────────┐
-         │   ROI    │  │  Models  │  │ Heatmaps │
-         └──────────┘  └──────────┘  └──────────┘
-                              │
-                              ▼
-                      ┌──────────────┐
-                      │   Logger &   │
-                      │   Metrics    │
-                      └──────────────┘
-```
 ##  Project Overview
 
 This system uses state-of-the-art anomaly detection models to identify defects in glove reinforcement patches. The pipeline includes:
@@ -322,30 +296,6 @@ print(f"Selected ROI: {roi_coords}")
 # Update config.py with the new coordinates
 ```
 
-##  Troubleshooting
-
-### Common Issues
-
-**1. Out of Memory during training**
-- Reduce batch size in `config.py`
-- Train models sequentially instead of in parallel
-- Use smaller image sizes
-
-**2. CUDA out of memory**
-- Set `accelerator='cpu'` in `TRAINING_CONFIG`
-- Reduce batch size
-- Train one model at a time
-
-**3. No checkpoints found**
-- Ensure training completed successfully
-- Check `logs/` directory for error messages
-- Verify model save directory exists
-
-**4. Images not loading**
-- Check file extensions match config
-- Verify data directory structure
-- Run `python main.py --verify`
-
 ##  Logging
 
 All operations are comprehensively logged:
@@ -382,28 +332,6 @@ python src/logger.py
 python src/utils.py
 ```
 
-##  Model-Specific Notes
-
-### PatchCore
-- Best for texture-based defects
-- Fast inference
-- No training required (uses coreset)
-
-### EfficientAD
-- Good balance of speed and accuracy
-- Lower memory footprint
-- Good for real-time applications
-
-### DRAEM
-- Synthetic anomaly generation
-- Works well with limited normal samples
-- Longer training time
-
-### STFPM
-- Knowledge distillation approach
-- Good generalization
-- Requires more epochs
-
 ##  Workflow Summary
 
 ```
@@ -423,29 +351,3 @@ python src/utils.py
    └─> python main.py --report
    └─> python main.py --compare-models
 ```
-
-##  Contributing
-
-When modifying the code:
-1. Follow the existing code structure
-2. Add docstrings to all functions
-3. Update `config.py` for new parameters
-4. Test with `python main.py --verify`
-5. Update this README if adding features
-
-##  License
-
-[Your License Here]
-
-##  Acknowledgments
-
-- **Anomalib**: https://github.com/openvinotoolkit/anomalib
-- Built with PyTorch, OpenCV, and NumPy
-
-##  Contact
-
-[Your Contact Information]
-
----
-
-**Note**: This README assumes you have the necessary hardware and dependencies installed. For production deployment, consider containerization with Docker for reproducibility.
