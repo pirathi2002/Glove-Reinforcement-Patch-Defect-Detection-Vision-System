@@ -38,10 +38,11 @@ env/
 .ipynb_checkpoints
 
 # Data directories (comment out if you want to track data)
-data/train/
-data/train_images/
-data/test/
-data/validation/
+# Data directories (comment out if you want to track data)
+# data/train/
+# data/train_images/
+# data/test/
+# data/validation/
 
 # Model checkpoints
 models/
