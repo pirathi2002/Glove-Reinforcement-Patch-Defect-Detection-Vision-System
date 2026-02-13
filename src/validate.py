@@ -14,8 +14,7 @@ from tqdm import tqdm
 
 from anomalib.engine import Engine
 from anomalib.data import PredictDataset
-from anomalib.models import get_model
-from anomalib.post_processing import Visualizer
+from anomalib import models
 
 from config import (
     ANOMALIB_MODELS,
@@ -53,8 +52,7 @@ class ModelValidator:
         self.model_dir = get_model_save_path(model_name, folder_idx)
         self.checkpoint_path = self._find_checkpoint()
         
-        # Setup visualizer and saver
-        self.visualizer = Visualizer()
+        # Setup heatmap saver (no Visualizer needed in v2.x)
         self.heatmap_saver = HeatmapSaver(model_name, folder_idx)
         
         # Load model
@@ -96,17 +94,38 @@ class ModelValidator:
         try:
             self.logger.info(f"Loading model from {self.checkpoint_path}")
             
-            # Load model
-            self.model = get_model(self.model_name)
+            # Get model class dynamically (Anomalib v2.x)
+            model_class = getattr(models, self.model_name.capitalize(), None)
             
-            # Load weights
-            checkpoint = torch.load(self.checkpoint_path)
-            self.model.load_state_dict(checkpoint['state_dict'])
+            if model_class is None:
+                # Try alternative naming
+                model_variants = [
+                    self.model_name.upper(),
+                    self.model_name.title(),
+                    ''.join(word.capitalize() for word in self.model_name.split('_')),
+                ]
+                for variant in model_variants:
+                    model_class = getattr(models, variant, None)
+                    if model_class:
+                        break
+            
+            if model_class is None:
+                raise ValueError(f"Model {self.model_name} not found in anomalib.models")
+            
+            # Create model instance
+            self.model = model_class()
+            
+            # Load checkpoint weights
+            checkpoint = torch.load(self.checkpoint_path, map_location='cpu')
+            if 'state_dict' in checkpoint:
+                self.model.load_state_dict(checkpoint['state_dict'])
+            else:
+                self.model.load_state_dict(checkpoint)
             
             # Set to eval mode
             self.model.eval()
             
-            # Create engine
+            # Create engine for prediction
             self.engine = Engine()
             
             self.logger.info("Model loaded successfully")

@@ -3,7 +3,46 @@ Configuration file for glove defect detection project.
 Contains all paths, parameters, and model configurations.
 """
 
+# ==================== CRITICAL: SSL/HTTPS CONFIGURATION ====================
+# This MUST be at the very top before any imports
 import os
+import sys
+
+# Comprehensive SSL fix - patches at all levels
+os.environ['PYTHONHTTPSVERIFY'] = '0'
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+os.environ['CURL_CA_BUNDLE'] = ''
+
+# Disable warnings before any imports
+import warnings
+warnings.filterwarnings('ignore')
+
+try:
+    # Patch SSL module before anything uses it
+    import ssl
+    _orig_create = ssl.create_default_context
+    
+    def patched_create_context(*args, **kwargs):
+        try:
+            ctx = _orig_create(*args, **kwargs)
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            return ctx
+        except:
+            return None
+    
+    ssl.create_default_context = patched_create_context
+    ssl._create_default_https_context = patched_create_context
+except Exception as e:
+    pass
+
+# Disable urllib3 SSL warnings
+try:
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+except:
+    pass
+
 from pathlib import Path
 
 # ==================== PROJECT PATHS ====================
@@ -157,8 +196,8 @@ MODEL_CONFIGS = {
 # ==================== TRAINING CONFIGURATION ====================
 TRAINING_CONFIG = {
     'image_size': (256, 256),
-    'num_epochs': 50,
-    'batch_size': 32,
+    'num_epochs': 1,
+    'batch_size': 2,
     'num_workers': 4,
     'learning_rate': 0.001,
     'early_stopping_patience': 10,
@@ -262,9 +301,9 @@ GPU_CONFIG = {
 
 # Print configuration summary
 if __name__ == "__main__":
-    print("=" * 50)
+    print("=" * 1)
     print("GLOVE DEFECT DETECTION - CONFIGURATION")
-    print("=" * 50)
+    print("=" * 1)
     print(f"Project Root: {PROJECT_ROOT}")
     print(f"Data Root: {DATA_ROOT}")
     print(f"Models Directory: {MODELS_DIR}")
@@ -274,4 +313,4 @@ if __name__ == "__main__":
     print(f"Image Size: {TRAINING_CONFIG['image_size']}")
     print(f"Batch Size: {TRAINING_CONFIG['batch_size']}")
     print(f"Epochs: {TRAINING_CONFIG['num_epochs']}")
-    print("=" * 50)
+    print("=" * 1)

@@ -4,7 +4,7 @@ A comprehensive anomaly detection system for glove reinforcement patch defects.
 """
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
+__author__ = "Pirathishanth"
 __description__ = "Anomaly detection for glove defect detection using Anomalib"
 
 from src.logger import ProjectLogger, MetricsTracker, HeatmapSaver

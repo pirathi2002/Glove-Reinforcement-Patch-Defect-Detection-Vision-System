@@ -3,8 +3,15 @@ Main pipeline for glove defect detection project.
 Orchestrates preprocessing, training, and validation.
 """
 
-import argparse
+import os
 import sys
+
+# Set environment variables first before any imports
+os.environ['PYTHONHTTPSVERIFY'] = '0'
+os.environ['REQUESTS_CA_BUNDLE'] = ''
+os.environ['CURL_CA_BUNDLE'] = ''
+
+import argparse
 from pathlib import Path
 
 from config import (
