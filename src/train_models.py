@@ -195,12 +195,6 @@ class AnomalibModelTrainer:
                 self.logger.error(f"Failed to create model: {self.model_name}")
                 return
             
-            # Print model backbone info
-            print(f"\n{'='*80}")
-            print(f"Model: {self.model_name}")
-            print(f"Backbone: {model.backbone}")
-            print(f"{'='*80}\n")
-            
             # Create datamodule
             datamodule = self._create_datamodule()
             

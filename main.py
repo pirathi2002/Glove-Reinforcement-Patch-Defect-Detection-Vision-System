@@ -3,15 +3,8 @@ Main pipeline for glove defect detection project.
 Orchestrates preprocessing, training, and validation.
 """
 
-import os
-import sys
-
-# Set environment variables first before any imports
-os.environ['PYTHONHTTPSVERIFY'] = '0'
-os.environ['REQUESTS_CA_BUNDLE'] = ''
-os.environ['CURL_CA_BUNDLE'] = ''
-
 import argparse
+import sys
 from pathlib import Path
 
 from config import (
@@ -97,7 +90,11 @@ Examples:
     parser.add_argument('--max-workers', type=int, default=4,
                        help='Maximum number of parallel workers')
     
-    # Validation options
+    # Preprocessing options
+    parser.add_argument('--no-roi', action='store_true',
+                       help='Skip ROI cropping during preprocessing (default: apply ROI)')
+    parser.add_argument('--fast', action='store_true',
+                       help='Fast preprocessing (skip CLAHE, denoise)')
     parser.add_argument('--interactive', action='store_true',
                        help='Run validation in interactive mode')
     parser.add_argument('--glove', type=int,
@@ -137,10 +134,23 @@ Examples:
             logger.info("PREPROCESSING TRAINING DATA")
             logger.info("=" * 80)
             
+            # Determine if ROI should be applied (default: True)
+            apply_roi = not args.no_roi
+            
+            logger.info(f"Apply ROI: {apply_roi}")
+            logger.info(f"Fast mode: {args.fast}")
+            
+            if args.fast:
+                logger.info("Running FAST preprocessing (skip CLAHE, denoise)")
+            else:
+                logger.info("Running FULL preprocessing with all filters")
+            
             preprocess_training_data(
                 source_dir=TRAIN_DIR,
                 target_dir=TRAIN_IMAGES_DIR,
-                num_folders=NUM_LIGHTING_CONDITIONS
+                num_folders=NUM_LIGHTING_CONDITIONS,
+                apply_roi=apply_roi,
+                fast_mode=args.fast
             )
             
             logger.info("✓ Preprocessing completed")

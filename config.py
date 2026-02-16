@@ -68,10 +68,10 @@ for dir_path in [TRAIN_IMAGES_DIR, MODELS_DIR, RESULTS_DIR, LOGS_DIR, HEATMAPS_D
 
 # ==================== ROI CONFIGURATION ====================
 ROI_CONFIG = {
-    'x': 50,
-    'y': 50,
-    'w': 150,
-    'h': 150,
+    'x': 30,
+    'y': 60,
+    'w': 180,
+    'h': 120,
     'debug': False
 }
 
