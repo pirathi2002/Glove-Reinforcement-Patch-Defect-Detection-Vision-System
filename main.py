@@ -126,7 +126,7 @@ Examples:
             if not is_valid:
                 logger.error("Data structure verification failed!")
                 sys.exit(1)
-            logger.info("✓ Data structure verified successfully")
+            logger.info(" Data structure verified successfully")
         
         # Preprocessing
         if args.preprocess or args.full_pipeline:
@@ -153,7 +153,7 @@ Examples:
                 fast_mode=args.fast
             )
             
-            logger.info("✓ Preprocessing completed")
+            logger.info(" Preprocessing completed")
         
         # Training
         if args.train or args.full_pipeline:
@@ -167,9 +167,9 @@ Examples:
                 result = train_single_model_folder(args.model, args.folder)
                 
                 if result['status'] == 'success':
-                    logger.info(f"✓ Training completed successfully")
+                    logger.info(f" Training completed successfully")
                 else:
-                    logger.error(f"✗ Training failed: {result['error']}")
+                    logger.error(f"Training failed: {result['error']}")
             
             elif args.model:
                 # Train specific model on all folders
@@ -181,7 +181,7 @@ Examples:
                 )
                 
                 successful = sum(1 for r in results if r['status'] == 'success')
-                logger.info(f"✓ Completed: {successful}/{len(results)} successful")
+                logger.info(f" Completed: {successful}/{len(results)} successful")
             
             elif args.all or args.full_pipeline:
                 # Train all models
@@ -192,7 +192,7 @@ Examples:
                     max_workers=args.max_workers
                 )
                 
-                logger.info("✓ All training completed")
+                logger.info(" All training completed")
             
             else:
                 logger.error("Please specify --model or --all for training")
@@ -238,7 +238,7 @@ Examples:
             logger.info("=" * 80)
             
             report = create_summary_report()
-            logger.info("✓ Summary report generated")
+            logger.info(" Summary report generated")
         
         logger.info("\n" + "=" * 80)
         logger.info("PIPELINE COMPLETED SUCCESSFULLY")
