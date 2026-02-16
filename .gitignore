@@ -25,6 +25,7 @@ venv/
 ENV/
 env/
 .venv
+glove/
 
 # IDE
 .vscode/
