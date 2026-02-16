@@ -158,18 +158,22 @@ class AnomalibModelTrainer:
         """
         try:
             # Create data module for single folder (one-class learning)
+            # Note: Newer Anomalib versions removed 'task' and 'image_size' parameters
+            # Image size is now handled via augmentations
+            # normal_dir should be relative to root, or an absolute path
             datamodule = Folder(
                 name=f"glove_folder_{self.folder_idx:02d}",
-                root=self.data_dir.parent,  # Parent directory
-                normal_dir=self.data_dir.name,  # Current folder name
+                root=str(self.data_dir.parent),  # Parent directory (train_images)
+                normal_dir=str(self.data_dir.name),  # Current folder name (folder_XX)
                 abnormal_dir=None,  # No abnormal examples (one-class)
-                normal_test_dir=None,  # Will use split
-                task="segmentation",
-                image_size=self.config['image_size'],
+                normal_test_dir=None,  # Will use split from normal data
                 train_batch_size=self.config['batch_size'],
                 eval_batch_size=self.config['batch_size'],
                 num_workers=self.config['num_workers'],
-                seed=self.config['seed'],
+                seed=self.config.get('seed', None),
+                normal_split_ratio=0.2,  # Use 20% of normal data for validation/test
+                test_split_mode="synthetic",  # Use synthetic test data when no abnormal dir
+                val_split_mode="same_as_test",  # Use same split strategy for validation
             )
             
             self.logger.info(f"Created datamodule for folder: {self.data_dir.name}")
@@ -195,25 +199,20 @@ class AnomalibModelTrainer:
                 self.logger.error(f"Failed to create model: {self.model_name}")
                 return
             
-            # Print model backbone info
+            # Print model info
             print(f"\n{'='*80}")
             print(f"Model: {self.model_name}")
-            print(f"Backbone: {model.backbone}")
+            backbone_name = getattr(model, 'backbone', None) or getattr(model, 'model', {})
+            print(f"Backbone: {backbone_name if backbone_name else 'N/A'}")
             print(f"{'='*80}\n")
             
             # Create datamodule
             datamodule = self._create_datamodule()
             
             # Create trainer/engine
+            # Note: Newer Anomalib Engine has simplified API
             engine = Engine(
-                task="segmentation",
-                image_metrics=["AUROC", "F1Score"],
-                pixel_metrics=["AUROC", "F1Score"],
-                accelerator=self.config['accelerator'],
-                devices=self.config['devices'],
-                max_epochs=self.config['num_epochs'],
                 default_root_dir=str(self.model_save_dir),
-                log_every_n_steps=self.config['log_every_n_steps'],
             )
             
             self.logger.info("Training started...")
@@ -234,12 +233,19 @@ class AnomalibModelTrainer:
             )
             
             self.logger.info("Test results:")
-            self.logger.log_metrics(test_results)
+            # test_results is a list of dicts from PyTorch Lightning
+            if isinstance(test_results, list) and len(test_results) > 0:
+                for result in test_results:
+                    if isinstance(result, dict):
+                        self.logger.log_metrics(result)
+            elif isinstance(test_results, dict):
+                self.logger.log_metrics(test_results)
             
             # Save final metrics
+            metrics_to_save = test_results[0] if isinstance(test_results, list) and len(test_results) > 0 else test_results
             self.metrics_tracker.add_validation_metrics(
                 epoch=self.config['num_epochs'],
-                metrics=test_results
+                metrics=metrics_to_save if isinstance(metrics_to_save, dict) else {}
             )
             
             # Save summary
